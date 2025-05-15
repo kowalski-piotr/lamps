@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Nowa Lampa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body class="bg-gray-100">
+
+<!-- MAP VIEW -->
+<div id="mapView" class="h-screen w-full flex items-end justify-center relative">
+    <div id="map" class="absolute inset-0 z-0"></div>
+    <button onclick="proceedToForm()" class="z-10 mb-6 px-6 py-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700">
+        Dodaj lampę tutaj
+    </button>
+</div>
+
+<!-- FORM VIEW -->
+<div id="formView" class="hidden min-h-screen pt-6 pb-24 px-4">
+    <form id="lampForm" class="bg-white shadow-md rounded-2xl p-6 max-w-3xl mx-auto">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Nowa Lampa</h2>
+
+        <input type="hidden" name="lat">
+        <input type="hidden" name="lng">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="block">Numer słupa
+                <input name="number" required class="mt-1 w-full rounded-md border p-2" />
+            </label>
+            <label class="block">Obwód
+                <input name="circuits" class="mt-1 w-full rounded-md border p-2" />
+            </label>
+            <label class="block">Właściciel słupa
+                <select name="column_property_id" required class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Typ słupa
+                <select name="column_type_id" required class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Wysokość słupa
+                <input type="number" name="column_height" class="mt-1 w-full rounded-md border p-2" />
+            </label>
+            <label class="block">Typ linii
+                <select name="line_type_id" required class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Położenie linii
+                <select name="line_location_id" required class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Typ montażu
+                <select name="mounting_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Wysięgnik
+                <select name="arm_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Status wysięgnika
+                <select name="arm_status_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Typ drogi
+                <select name="road_type_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Rodzaj drogi
+                <select name="road_category_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Klasa drogi
+                <select name="road_class_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Typ chodnika
+                <select name="sidewalk_type_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Typ nawierzchni
+                <select name="pavement_type_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Szafa (rack)
+                <select name="rack_primary_id" id="rack_primary_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">Stacja (station)
+                <select name="station_primary_id" id="station_primary_id" class="mt-1 w-full rounded-md border p-2"></select>
+            </label>
+            <label class="block">ESCO
+                <select name="esco" class="mt-1 w-full rounded-md border p-2">
+                    <option value="0">Nie</option>
+                    <option value="1">Tak</option>
+                </select>
+            </label>
+            <label class="block md:col-span-2">Komentarz
+                <textarea name="comment" class="mt-1 w-full rounded-md border p-2"></textarea>
+            </label>
+            <div class="md:col-span-2">
+                <label class="block text-gray-700 mb-1">Oprawy (sockets)</label>
+                <table class="w-full text-sm text-left text-gray-700 mb-2">
+                    <thead><tr class="bg-gray-200"><th class="p-2">#</th><th class="p-2">Typ</th><th class="p-2">Model</th><th class="p-2">Linter</th><th class="p-2">Moc</th><th></th></tr></thead>
+                    <tbody id="socketList"></tbody>
+                </table>
+                <button type="button" onclick="showSocketModal()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">Dodaj oprawę</button>
+            </div>
+        </div>
+    </form>
+    <div id="submitBar" class="hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-md px-4 py-3 flex justify-center">
+        <button id="saveLampBtn" class="bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700">
+            Zapisz lampę
+        </button>
+    </div>
+</div>
+
+<!-- MODAL OPRAWY -->
+<div id="socketModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-xl">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Dodaj oprawę</h3>
+        <form id="socketForm" class="grid gap-4">
+            <label>Numer:
+                <input name="number" type="number" required class="w-full p-2 border rounded-md" />
+            </label>
+            <label>Typ gniazda:
+                <select name="socket_type_id" required class="w-full p-2 border rounded-md"></select>
+            </label>
+            <label>Model gniazda:
+                <select name="socket_model_id" required class="w-full p-2 border rounded-md"></select>
+            </label>
+            <label>Moc:
+                <input name="power" type="number" required class="w-full p-2 border rounded-md" />
+            </label>
+            <label>Moc rzeczywista:
+                <input name="power_real" type="number" required class="w-full p-2 border rounded-md" />
+            </label>
+            <label>Model linter:
+                <select name="linter_model_id" required class="w-full p-2 border rounded-md"></select>
+            </label>
+            <label>Moc linter:
+                <input name="linter_power" type="number" required class="w-full p-2 border rounded-md" />
+            </label>
+            <div class="flex justify-between">
+                <button type="button" onclick="hideSocketModal()" class="text-gray-600 hover:underline">Anuluj</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Dodaj</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
