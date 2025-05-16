@@ -102,7 +102,7 @@ document.getElementById('lampForm').addEventListener('submit', async e => {
     data.sockets = socketFrames;
 
     // console.log(data);
-    const res = await fetch('http://linterview.pl/api/save_lamp', {
+    const res = await fetch('https://linterview.pl/api/save_lamp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -136,7 +136,7 @@ function populateRackAndStationSelects(dict) {
 }
 
 async function loadDictionaries() {
-    const res = await fetch('http://linterview.pl/api/get_dict');
+    const res = await fetch('https://linterview.pl/api/get_dict');
     const dict = await res.json();
 
     const maps = {
